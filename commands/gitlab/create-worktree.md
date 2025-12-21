@@ -173,7 +173,7 @@ else
     else
         # Initialize spec-kit in the worktree directory first
         echo "Initializing spec-kit in worktree..."
-        (cd "$WORKTREE_ABS_PATH" && uvx --from git+https://github.com/young-hwang/spec-kit.git specify init --here --ai claude)
+        (cd "$WORKTREE_ABS_PATH" && uvx --from git+https://github.com/young-hwang/spec-kit.git specify init --here --script sh --force --ai claude)
 
         # Create new tmux session in the worktree directory
         echo "Creating tmux session: $SESSION_NAME"
