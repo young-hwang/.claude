@@ -1,7 +1,6 @@
 {
+  "cleanupPeriodDays": 20,
   "permissions": {
-    "allowDangerouslySkipPermissions": true,
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(grep:*)",
       "Bash(ls:*)",
@@ -23,10 +22,10 @@
       "WebFetch(domain:github.com)",
       "mcp__context7"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "bypassPermissions",
+    "allowDangerouslySkipPermissions": true
   },
-  "cleanupPeriodDays": 20,
   "verbose": true,
-  "output-format": "json",
-  "alwaysThinkingEnabled": false
+  "output-format": "json"
 }
