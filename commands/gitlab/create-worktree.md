@@ -29,22 +29,12 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
    - Search for existing branches with the issue number (e.g., `feature/123`, `issue-123`)
    - If no branch exists, create branch name from issue (e.g., `feature/123-feature-description`)
 
-4. **Create worktree in parent directory**
-   - Check if worktree already exists for the branch
-   - Create worktree at `../worktrees/<branch-name>`
-   - This keeps the main project directory clean
-   - Checkout or create the branch in the worktree
+4. **Create worktree, tmux session, and initialize spec-kit**
+    - Execute external script to create the worktree and session.
+    - The script handles checking for existing worktrees, creating the branch if needed, and setting up the tmux environment.
 
-5. **Create tmux session and initialize spec-kit**
-   - Create a new tmux session named `<issue-number>-develop`
-   - Navigate to the worktree directory
-   - Initialize spec-kit with claude AI configuration
-   - Skip if tmux is not installed
-
-6. **Provide next steps**
-   - Show worktree location and branch information
-   - Display command to navigate to worktree or attach to tmux session
-   - Show git worktree list
+5. **Provide next steps**
+    - The script will output the final status and instructions.
 
 ## Example Implementation
 
@@ -106,9 +96,8 @@ EXISTING_BRANCHES=$(git branch -a | grep -E "(feature[/-]${ISSUE_NUMBER}[^0-9]|f
 
 if [ -n "$EXISTING_BRANCHES" ]; then
     # Remove any whitespace
-    EXISTING_BRANCHES=$(echo "$EXISTING_BRANCHES" | xargs)
-    echo "Found existing branch: $EXISTING_BRANCHES"
-    BRANCH_NAME="$EXISTING_BRANCHES"
+    BRANCH_NAME=$(echo "$EXISTING_BRANCHES" | xargs)
+    echo "Found existing branch: $BRANCH_NAME"
 else
     # Create branch name from issue in feature/{issue-number}-{slug} format
     SLUG=$(echo "$ISSUE_TITLE" | iconv -t ascii//TRANSLIT | sed -r s/[^a-zA-Z0-9]+/-/g | sed -r s/^-+\|-+$//g | tr A-Z a-z | cut -c1-50)
@@ -116,94 +105,17 @@ else
     echo "No existing branch found. Suggested branch name: $BRANCH_NAME"
 fi
 
-# Step 5: Create worktree in parent directory
-WORKTREE_DIR="../worktrees/$BRANCH_NAME"
+# Step 5: Execute worktree creation script
+# The script is assumed to be in the `scripts` directory of the project root
+SCRIPT_PATH="./scripts/create-gitlab-worktree.sh"
 
-# Create parent worktrees directory if needed
-mkdir -p "../worktrees"
-
-# Check if worktree already exists for this branch
-EXISTING_WORKTREE=$(git worktree list | grep "$BRANCH_NAME" | awk '{print $1}')
-
-if [ -n "$EXISTING_WORKTREE" ]; then
-    echo "Worktree already exists for branch '$BRANCH_NAME' at: $EXISTING_WORKTREE"
-    echo "To use it, run: cd $EXISTING_WORKTREE"
-    exit 0
+if [ ! -f "$SCRIPT_PATH" ]; then
+    echo "Error: Worktree creation script not found at $SCRIPT_PATH"
+    exit 1
 fi
 
-# Also check if directory exists but not registered as worktree
-if [ -d "$WORKTREE_DIR" ]; then
-    echo "Warning: Directory exists at $WORKTREE_DIR but is not a registered worktree"
-    echo "Removing directory and creating proper worktree..."
-    rm -rf "$WORKTREE_DIR"
-fi
-
-# Check if branch exists locally or remotely
-if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
-    # Local branch exists
-    echo "Creating worktree from existing local branch..."
-    git worktree add "$WORKTREE_DIR" "$BRANCH_NAME"
-elif git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
-    # Remote branch exists
-    echo "Creating worktree from remote branch..."
-    git worktree add "$WORKTREE_DIR" "$BRANCH_NAME"
-else
-    # Create new branch
-    echo "Creating new branch and worktree..."
-    git worktree add -b "$BRANCH_NAME" "$WORKTREE_DIR"
-fi
-
-# Step 6: Create tmux session and initialize spec-kit
-SESSION_NAME="${ISSUE_NUMBER}-develop"
-
-# Check if tmux is installed
-if ! command -v tmux &> /dev/null; then
-    echo "Warning: tmux is not installed. Skipping tmux session creation."
-    echo "To install tmux:"
-    echo "  macOS:   brew install tmux"
-    echo "  Linux:   sudo apt-get install tmux"
-else
-    # Get absolute path of worktree
-    WORKTREE_ABS_PATH=$(cd "$WORKTREE_DIR" && pwd)
-
-    # Check if session already exists
-    if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-        echo "tmux session '$SESSION_NAME' already exists"
-        echo "To attach: tmux attach -t $SESSION_NAME"
-    else
-        # Initialize spec-kit in the worktree directory first
-        echo "Initializing spec-kit in worktree..."
-        (cd "$WORKTREE_ABS_PATH" && uvx --from git+https://github.com/young-hwang/spec-kit.git specify init --here --script sh --force --ai claude)
-
-        # Create new tmux session in the worktree directory
-        echo "Creating tmux session: $SESSION_NAME"
-        tmux new-session -d -s "$SESSION_NAME" -c "$WORKTREE_ABS_PATH"
-
-        # Start claude code in the session
-        tmux send-keys -t "$SESSION_NAME" "claude" C-m
-
-        echo "✓ tmux session created: $SESSION_NAME"
-        echo "✓ spec-kit initialized and claude code started"
-        echo "  To attach: tmux attach -t $SESSION_NAME"
-    fi
-fi
-
-echo ""
-
-# Step 7: Show results
-echo "✓ Worktree created successfully!"
-echo "  Location: $WORKTREE_DIR"
-echo "  Branch: $BRANCH_NAME"
-echo "  Issue: #$ISSUE_NUMBER - $ISSUE_TITLE"
-echo ""
-echo "To start working:"
-echo "  cd $WORKTREE_DIR"
-if command -v tmux &> /dev/null && tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    echo "  OR: tmux attach -t $SESSION_NAME"
-fi
-echo ""
-echo "All worktrees:"
-git worktree list
+# Execute the script, passing the determined parameters
+bash "$SCRIPT_PATH" "$BRANCH_NAME" "$ISSUE_NUMBER" "$ISSUE_TITLE"
 ```
 
 ## Notes
