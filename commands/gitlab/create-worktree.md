@@ -39,12 +39,6 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
 6. **Create tmux Development Session**
     - Executes `scripts/create-tmux-session.sh` to create a named tmux session in the worktree directory. The session will be named `{issue_number}-develop`.
 
-
-
-
-
-
-
 ## Notes
 
 - Worktrees are created in `../worktrees/` to keep the main project clean
