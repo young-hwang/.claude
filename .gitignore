@@ -12,6 +12,8 @@
 !/commands/**/*.*
 !/plugins/**/*.*
 !/hooks/**/*.*
+!/scripts
+!/scripts/**/*.*
 !settings.json
 !README.md
 !CLAUDE.md

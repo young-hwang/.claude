@@ -1,12 +1,12 @@
 ---
-description: Create well-formatted git commits with conventional commit messages and emoji
+description: Create well-formatted git commits with conventional commit messages
 category: version-control-git
 allowed-tools: Bash, Read, Glob
 ---
 
-# Claude Command: Commit
+# Command: Commit
 
-This command helps you create well-formatted commits with conventional commit messages and emoji.
+This command helps you create well-formatted commits with conventional commit messages.
 
 ## Usage
 
@@ -32,9 +32,9 @@ Or with options:
 4. Performs a `git diff` to understand what changes are being committed
 5. Analyzes the diff to determine if multiple distinct logical changes are present
 ONCE user confirm it with yes proceed to the next step
-6. If accepted, update the memory CLAUDE.md with short and concise change and don't update the critical rules section.
+6. If accepted, update a memory file with a short and concise change, and do not update the critical rules section.
 7. If multiple distinct changes are detected, suggests breaking the commit into multiple smaller commits
-8. For each commit (or the single commit if not split), creates a commit message using emoji conventional commit format
+8. For each commit (or the single commit if not split), creates a commit message using conventional commit format
 
 ## Best Practices for Commits
 
@@ -52,5 +52,3 @@ ONCE user confirm it with yes proceed to the next step
   - `chore`: Changes to the build process, tools, etc.
 - **Present tense, imperative mood**: Write commit messages as commands (e.g., "add feature" not "added feature")
 - **Concise first line**: Keep the first line under 72 characters
-- **Emoji**: Each commit type is paired with an appropriate emoji:
-  - ✨ `feat`: New feature

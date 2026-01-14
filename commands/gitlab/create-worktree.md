@@ -30,14 +30,14 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
    - If no branch exists, create branch name from issue (e.g., `feature/123-feature-description`)
 
 4. **Create Git Worktree**
-    - Executes `scripts/create-git-worktree.sh` with the determined branch name.
+    - Executes `scripts/git-create-worktree.sh` with the determined branch name.
     - This script handles the logic for creating the worktree.
 
 5. **Initialize Spec-Kit**
-    - Executes `scripts/init-spec-kit.sh` in the new worktree directory to set up the development environment.
+    - Executes `scripts/spec-kit-init.sh` in the new worktree directory to set up the development environment.
 
 6. **Create tmux Development Session**
-    - Executes `scripts/create-tmux-session.sh` to create a named tmux session in the worktree directory. The session will be named `{issue_number}-develop`.
+    - Executes `scripts/tmux-create-session.sh` to create a named tmux session in the worktree directory. The session will be named `{issue_number}-develop`.
 
 ## Notes
 
