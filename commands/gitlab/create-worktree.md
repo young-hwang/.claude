@@ -15,8 +15,8 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
 
 ## Workflow
 
-1. **Check glab CLI installation via `scripts/check_glab.sh`**
-   - Executes the `scripts/check_glab.sh` script to verify `glab` is installed and authenticated.
+1. **Check glab CLI installation via `~/.claude/scripts/check_glab.sh`**
+   - Executes the `~/.claude/scripts/check_glab.sh` script without any arguments to verify `glab` is installed and authenticated.
    - The script will stop execution and provide instructions if `glab` is not found or configured.
 
 2. **Extract and validate issue**
@@ -30,14 +30,19 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
    - If no branch exists, create branch name from issue (e.g., `feature/123-feature-description`)
 
 4. **Create Git Worktree**
-    - Executes `scripts/git-create-worktree.sh` with the determined branch name.
-    - This script handles the logic for creating the worktree.
+    - Executes `~/.claude/scripts/git-create-worktree.sh` passing the determined branch name (e.g., `feature/123-feature-description`) as the sole argument.
+    - This script handles the logic for creating the worktree and outputs its path.
+    - Example: `~/.claude/scripts/git-create-worktree.sh <branch_name>`
 
 5. **Initialize Spec-Kit**
-    - Executes `scripts/spec-kit-init.sh` in the new worktree directory to set up the development environment.
+    - Executes `~/.claude/scripts/spec-kit-init.sh` passing the path to the newly created worktree directory (from step 4) as the sole argument.
+    - Example: `~/.claude/scripts/spec-kit-init.sh <path_to_worktree>`
 
 6. **Create tmux Development Session**
-    - Executes `scripts/tmux-create-session.sh` to create a named tmux session in the worktree directory. The session will be named `{issue_number}-develop`.
+    - Executes `~/.claude/scripts/tmux-create-session.sh` with two arguments:
+      1. Session Name: `{issue_number}-develop`
+      2. Target Directory: The path to the newly created worktree directory from step 4.
+    - Example: `~/.claude/scripts/tmux-create-session.sh {issue_number}-develop <path_to_worktree>`
 
 ## Notes
 

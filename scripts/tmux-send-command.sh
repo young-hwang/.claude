@@ -20,5 +20,6 @@ fi
 # Send the command to the tmux session
 # The 'C-m' at the end simulates pressing the Enter key.
 tmux send-keys -t "$SESSION_NAME" "$COMMAND_TO_SEND" C-m
+tmux send-keys -t "" C-m
 
 echo "Command sent to tmux session '$SESSION_NAME'."
