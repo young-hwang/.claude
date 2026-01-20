@@ -1,335 +1,256 @@
-# Claude Code Configuration Repository
+# Everything Claude Code
 
-This repository manages global configuration and customization for [Claude Code](https://claude.com/claude-code).
+**The complete collection of Claude Code configs from an Anthropic hackathon winner.**
 
-## 📁 Project Structure
-
-```
-.claude/
-├── CLAUDE.md                    # Global instructions (applied to all projects)
-├── settings.json                # Global settings file
-├── .gitignore                   # Git ignore list
-│
-├── commands/                    # Claude Code skills/commands
-│   ├── common/                  # Common development commands
-│   ├── git/                     # Git-related commands
-│   ├── github/                  # GitHub integration commands
-│   ├── gitlab/                  # GitLab integration commands
-│   └── rapid-development/       # Rapid development workflows
-│
-├── plugins/                     # Plugin management
-│   ├── marketplaces/            # Plugin marketplaces
-│   ├── repos/                   # Plugin repositories
-│   └── config.json              # Plugin configuration
-│
-├── hooks/                       # Claude Code hook scripts
-└── scripts/                     # Utility scripts
-```
-
-## 🎯 Key Components
-
-### 1. CLAUDE.md - Global Instructions
-Defines rules and principles that Claude Code must follow across all projects:
-- Code quality and standards
-- File management rules
-- Architecture respect
-- Security and best practices
-
-### 2. settings.json - Global Configuration
-Settings that control Claude Code behavior:
-- **cleanupPeriodDays**: File cleanup period (default: 20 days)
-- **permissions**: Tool usage permissions
-  - `allow`: List of tools that can be used without approval
-  - `defaultMode`: Permission mode (bypassPermissions)
-- **verbose**: Detailed logging output
-- **output-format**: Output format (json)
-
-### 3. Commands - Skills Library
-
-#### 📦 Common Commands
-Commands for general development tasks:
-- `bug-fix` - Systematic bug fix workflow
-- `refactor-simple` - Quick refactoring
-- `review-general` - Code review
-- `review-staged-unstaged` - Review staged/unstaged files
-- `optimize` - Performance optimization
-- `code_analysis` - Code analysis
-- `clean` - Fix linting and formatting issues
-- `debug-RCA` - Debug and root cause analysis
-- `tdd` - Test-driven development workflow
-- `run-ci` - Run CI checks and fix errors
-- `todo` - Project todo management
-- `prime` / `prime-core` - Load project context
-- `create-docs` - Generate technical specifications
-- `add-to-changelog` - Update CHANGELOG
-- `update-docs` - Update documentation
-- `release` - Prepare release
-- `create-command` - Create new command
-- `onboarding` - New developer onboarding analysis
-- `five` - Five Whys root cause analysis
-
-#### 🔧 Git Commands
-Commands for Git operations:
-- `commit` - Generate conventional commit messages
-- `create-worktree` - Create Git worktree
-- `conflict-resolver-general` - Resolve merge conflicts
-- `smart-resolver` - Intelligent conflict resolution
-
-#### 🐙 GitHub Commands
-GitHub integration commands:
-- `create-pr` - Create Pull Request
-- `pr-review` - Multi-perspective PR review
-- `create-docs` - Generate technical specs from GitHub issues
-
-#### 🦊 GitLab Commands
-GitLab integration commands:
-- `create-mr` - Create Merge Request
-- `pr-review` - Multi-perspective MR review
-- `create-worktree` - Create worktree for GitLab issue
-- `clean-worktree` - Cleanup worktree and tmux session
-- `orchestrator-agent` - Orchestrate multi-agent development workflow
-- `developer-agent` - Developer agent (typically invoked by orchestrator)
-- `tester-agent` - Testing agent (typically invoked by orchestrator)
-
-#### ⚡ Rapid Development
-Experimental commands for rapid development:
-- `hackathon-research` - Hackathon multi-option research
-- `prp-*` - PRP (Parallel Research Planning) series
-
-### 4. Plugins
-Plugin system to extend Claude Code functionality
-
-### 5. Hooks
-Define custom behaviors for Claude Code events
-
-## 🚀 Usage
-
-### Running Skills
-```bash
-# Execute a skill in Claude Code
-/skill-name
-
-# Examples
-/commit               # Create Git commit
-/review-general       # Code review
-/create-pr           # Create Pull Request
-```
-
-### Modifying Settings
-Edit `settings.json` to change permissions, cleanup period, etc.
-
-### Customizing Global Instructions
-Modify `CLAUDE.md` to adjust how Claude Code behaves across all projects.
-
-## 🤖 Multi-Agent Workflow
-
-The multi-agent workflow system enables automated development using separate orchestrator, developer, and tester agents running in isolated tmux sessions.
-
-### Architecture
-
-The workflow consists of three specialized agents:
-- **Orchestrator Agent**: Coordinates the entire workflow, monitors progress, and manages iterations
-- **Developer Agent**: Implements features and fixes issues based on requirements and test feedback
-- **Tester Agent**: Runs tests, analyzes results, and provides structured feedback
-
-### Workflow Process
-
-```
-User: /orchestrator-agent <issue-number>
-  ↓
-Create Worktree + State Directory
-  ↓
-Launch Developer Agent (tmux session)
-  ↓
-Developer: Implement Feature
-  ↓
-Launch Tester Agent (tmux session)
-  ↓
-Tester: Run Tests
-  ↓
-Tests Passed?
-  ├─ Yes → Commit + Create MR → Complete
-  └─ No → Developer: Fix Issues → Retry (max 3 iterations)
-```
-
-### State Management
-
-Agents communicate via JSON state files in `.workflow/` directory (gitignored):
-- `workflow.json` - Overall workflow coordination
-- `dev-status.json` - Developer progress and status
-- `test-results.json` - Test outcomes and feedback
-- `iteration-history.json` - Audit trail of all iterations
-- `logs/` - Session logs and test output
-
-### Tmux Session Naming
-
-Sessions are named by role: `<issue-number>-<role>`
-- `123-orchestrator` - Orchestrator monitoring session
-- `123-developer` - Developer implementation session
-- `123-tester` - Tester execution session
-
-### Usage Example
-
-```bash
-# Start orchestrated workflow for GitLab issue #456
-$ claude
-> /orchestrator-agent 456
-
-# Orchestrator automatically:
-# 1. Creates worktree at ../worktrees/feature/456-*
-# 2. Initializes .workflow/ state directory
-# 3. Launches developer session (456-developer)
-# 4. Waits for development completion
-# 5. Launches tester session (456-tester)
-# 6. Coordinates dev-test iteration cycles
-# 7. Creates MR when all tests pass
-
-# Observe agents in separate terminals (optional):
-$ tmux attach -t 456-developer
-$ tmux attach -t 456-tester
-
-# After completion:
-> /clean-worktree 456
-```
-
-### Manual Agent Usage
-
-Agents can also be run manually for debugging or custom workflows:
-
-```bash
-# Run developer agent manually
-$ cd ../worktrees/feature/456-*
-$ claude
-> /developer-agent 456
-
-# Run tester agent manually
-> /tester-agent 456
-```
-
-### Error Handling
-
-The system handles common failure scenarios:
-- **Developer timeout** (60 min) - Orchestrator exits gracefully, sessions remain for inspection
-- **Test failures** - Up to 3 automatic retry iterations with structured feedback
-- **Test timeout** (30 min) - Workflow fails with clear error messages
-- **Max iterations exceeded** - Requires manual intervention
-- **Missing dependencies** - Early validation with installation instructions
-
-### State File Examples
-
-**workflow.json**:
-```json
-{
-  "issue_number": "456",
-  "workflow_state": "testing",
-  "current_iteration": 2,
-  "max_iterations": 3,
-  "sessions": {
-    "orchestrator": "456-orchestrator",
-    "developer": "456-developer",
-    "tester": "456-tester"
-  }
-}
-```
-
-**dev-status.json**:
-```json
-{
-  "status": "complete",
-  "iteration": 2,
-  "ready_for_testing": true,
-  "files_modified": ["src/user.service.ts", "src/user.controller.ts"],
-  "notes": "Implementation complete for iteration 2"
-}
-```
-
-**test-results.json**:
-```json
-{
-  "iteration": 2,
-  "status": "passed",
-  "test_summary": {"total": 25, "passed": 25, "failed": 0},
-  "coverage": {"lines": 87.5},
-  "feedback_for_developer": "All tests passed! Great work!"
-}
-```
-
-### Supported Test Frameworks
-
-The tester agent auto-detects and supports:
-- **Node.js**: Jest, Vitest, Mocha (via `npm test`)
-- **Java**: JUnit (via Gradle or Maven)
-- **Python**: pytest
-- **Rust**: cargo test
-
-### Benefits
-
-- **Automation**: Eliminates repetitive worktree creation, testing, and MR creation
-- **Consistency**: Standardized development workflow across all issues
-- **Traceability**: Complete audit trail in iteration history
-- **Resilience**: State files enable recovery from crashes
-- **Visibility**: Real-time monitoring via tmux sessions
-- **Quality**: Automated testing ensures code quality before MR creation
-
-### Technical Details
-
-For complete implementation details and architecture decisions, see:
-- `/Users/young/.claude/plans/jazzy-beaming-fog.md` (English)
-- `/Users/young/.claude/multi-agent-workflow-ko.md` (Korean)
-
-## 📝 Version Control Strategy
-
-### Version-Controlled Files
-- `CLAUDE.md` - Global instructions
-- `settings.json` - Global settings
-- `.gitignore` - Ignore list
-- `commands/` - Skills definitions
-- `plugins/config.json` - Plugin configuration
-- `hooks/` - Hook scripts
-- `scripts/` - Utility scripts
-
-### Ignored Files
-- `.anthropic/` - Authentication information
-- `history.jsonl` - Conversation history
-- `file-history/` - File change history
-- `todos/` - Todo lists
-- `projects/` - Project data
-- `agents/` - Agent runtime data
-- `session-env/` - Session environment
-- `debug/` - Debug information
-- `shell-snapshots/` - Shell snapshots
-- `stats-cache.json` - Statistics cache
-- `statsig/` - Statistics data
-- `telemetry/` - Telemetry data
-- `ide/` - IDE settings
-
-## 🔒 Security Considerations
-
-- The `.anthropic/` directory contains authentication information - never share it
-- Do not include sensitive information like API keys, tokens, or passwords in config files
-- Ensure `.gitignore` is properly configured before pushing to public repositories
-
-## 🛠️ Maintenance
-
-### Cleanup Period
-Old files are automatically cleaned based on the `cleanupPeriodDays` setting in `settings.json` (default: 20 days).
-
-### Backup Recommendations
-Regular backups of important skills and settings are recommended:
-- `CLAUDE.md`
-- `settings.json`
-- Entire `commands/` directory
-- Custom `hooks/` and `scripts/`
-
-## 📚 Resources
-
-- [Claude Code Official Documentation](https://docs.anthropic.com)
-- [Claude Code GitHub](https://github.com/anthropics/claude-code)
-
-## 📄 License
-
-This configuration repository is for personal use.
+This repo contains production-ready agents, skills, hooks, commands, rules, and MCP configurations that I use daily with Claude Code. These configs evolved over 10+ months of intensive use building real products.
 
 ---
 
-**Last Updated**: 2026-01-08
+## Read the Full Guide First
+
+**Before diving into these configs, read the complete guide on X:**
+
+
+<img width="592" height="445" alt="image" src="https://github.com/user-attachments/assets/1a471488-59cc-425b-8345-5245c7efbcef" />
+
+
+**[The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/status/2012378465664745795)**
+
+
+
+The guide explains:
+- What each config type does and when to use it
+- How to structure your Claude Code setup
+- Context window management (critical for performance)
+- Parallel workflows and advanced techniques
+- The philosophy behind these configs
+
+**This repo is configs only! Tips, tricks and more examples are in my X articles and videos (links will be appended to this readme as it evolves).**
+
+---
+
+## What's Inside
+
+```
+everything-claude-code/
+|-- agents/           # Specialized subagents for delegation
+|   |-- planner.md           # Feature implementation planning
+|   |-- architect.md         # System design decisions
+|   |-- tdd-guide.md         # Test-driven development
+|   |-- code-reviewer.md     # Quality and security review
+|   |-- security-reviewer.md # Vulnerability analysis
+|   |-- build-error-resolver.md
+|   |-- e2e-runner.md        # Playwright E2E testing
+|   |-- refactor-cleaner.md  # Dead code cleanup
+|   |-- doc-updater.md       # Documentation sync
+|
+|-- skills/           # Workflow definitions and domain knowledge
+|   |-- coding-standards.md         # Language best practices
+|   |-- backend-patterns.md         # API, database, caching patterns
+|   |-- frontend-patterns.md        # React, Next.js patterns
+|   |-- project-guidelines-example.md # Example project-specific skill
+|   |-- tdd-workflow/               # TDD methodology
+|   |-- security-review/            # Security checklist
+|   |-- clickhouse-io.md            # ClickHouse analytics
+|
+|-- commands/         # Slash commands for quick execution
+|   |-- tdd.md              # /tdd - Test-driven development
+|   |-- plan.md             # /plan - Implementation planning
+|   |-- e2e.md              # /e2e - E2E test generation
+|   |-- code-review.md      # /code-review - Quality review
+|   |-- build-fix.md        # /build-fix - Fix build errors
+|   |-- refactor-clean.md   # /refactor-clean - Dead code removal
+|   |-- test-coverage.md    # /test-coverage - Coverage analysis
+|   |-- update-codemaps.md  # /update-codemaps - Refresh docs
+|   |-- update-docs.md      # /update-docs - Sync documentation
+|
+|-- rules/            # Always-follow guidelines
+|   |-- security.md         # Mandatory security checks
+|   |-- coding-style.md     # Immutability, file organization
+|   |-- testing.md          # TDD, 80% coverage requirement
+|   |-- git-workflow.md     # Commit format, PR process
+|   |-- agents.md           # When to delegate to subagents
+|   |-- performance.md      # Model selection, context management
+|   |-- patterns.md         # API response formats, hooks
+|   |-- hooks.md            # Hook documentation
+|
+|-- hooks/            # Trigger-based automations
+|   |-- hooks.json          # PreToolUse, PostToolUse, Stop hooks
+|
+|-- mcp-configs/      # MCP server configurations
+|   |-- mcp-servers.json    # GitHub, Supabase, Vercel, Railway, etc.
+|
+|-- plugins/          # Plugin ecosystem documentation
+|   |-- README.md           # Plugins, marketplaces, skills guide
+|
+|-- examples/         # Example configurations
+    |-- CLAUDE.md           # Example project-level config
+    |-- user-CLAUDE.md      # Example user-level config (~/.claude/CLAUDE.md)
+    |-- statusline.json     # Custom status line config
+```
+
+---
+
+## Quick Start
+
+### 1. Copy what you need
+
+```bash
+# Clone the repo
+git clone https://github.com/affaan-m/everything-claude-code.git
+
+# Copy agents to your Claude config
+cp everything-claude-code/agents/*.md ~/.claude/agents/
+
+# Copy rules
+cp everything-claude-code/rules/*.md ~/.claude/rules/
+
+# Copy commands
+cp everything-claude-code/commands/*.md ~/.claude/commands/
+
+# Copy skills
+cp -r everything-claude-code/skills/* ~/.claude/skills/
+```
+
+### 2. Add hooks to settings.json
+
+Copy the hooks from `hooks/hooks.json` to your `~/.claude/settings.json`.
+
+### 3. Configure MCPs
+
+Copy desired MCP servers from `mcp-configs/mcp-servers.json` to your `~/.claude.json`.
+
+**Important:** Replace `YOUR_*_HERE` placeholders with your actual API keys.
+
+### 4. Read the guide
+
+Seriously, [read the guide](https://x.com/affaanmustafa/status/2012378465664745795). These configs make 10x more sense with context.
+
+---
+
+## Key Concepts
+
+### Agents
+
+Subagents handle delegated tasks with limited scope. Example:
+
+```markdown
+---
+name: code-reviewer
+description: Reviews code for quality, security, and maintainability
+tools: Read, Grep, Glob, Bash
+model: opus
+---
+
+You are a senior code reviewer...
+```
+
+### Skills
+
+Skills are workflow definitions invoked by commands or agents:
+
+```markdown
+# TDD Workflow
+
+1. Define interfaces first
+2. Write failing tests (RED)
+3. Implement minimal code (GREEN)
+4. Refactor (IMPROVE)
+5. Verify 80%+ coverage
+```
+
+### Hooks
+
+Hooks fire on tool events. Example - warn about console.log:
+
+```json
+{
+  "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(ts|tsx|js|jsx)$\"",
+  "hooks": [{
+    "type": "command",
+    "command": "#!/bin/bash\ngrep -n 'console\\.log' \"$file_path\" && echo '[Hook] Remove console.log' >&2"
+  }]
+}
+```
+
+### Rules
+
+Rules are always-follow guidelines. Keep them modular:
+
+```
+~/.claude/rules/
+  security.md      # No hardcoded secrets
+  coding-style.md  # Immutability, file limits
+  testing.md       # TDD, coverage requirements
+```
+
+---
+
+## Contributing
+
+**Contributions are welcome and encouraged.**
+
+This repo is meant to be a community resource. If you have:
+- Useful agents or skills
+- Clever hooks
+- Better MCP configurations
+- Improved rules
+
+Please contribute! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Ideas for Contributions
+
+- Language-specific skills (Python, Go, Rust patterns)
+- Framework-specific configs (Django, Rails, Laravel)
+- DevOps agents (Kubernetes, Terraform, AWS)
+- Testing strategies (different frameworks)
+- Domain-specific knowledge (ML, data engineering, mobile)
+
+---
+
+## Background
+
+I've been using Claude Code since the experimental rollout. Won the Anthropic x Forum Ventures hackathon in Sep 2025 building [zenith.chat](https://zenith.chat) with [@DRodriguezFX](https://x.com/DRodriguezFX) - entirely using Claude Code.
+
+These configs are battle-tested across multiple production applications.
+
+---
+
+## Important Notes
+
+### Context Window Management
+
+**Critical:** Don't enable all MCPs at once. Your 200k context window can shrink to 70k with too many tools enabled.
+
+Rule of thumb:
+- Have 20-30 MCPs configured
+- Keep under 10 enabled per project
+- Under 80 tools active
+
+Use `disabledMcpServers` in project config to disable unused ones.
+
+### Customization
+
+These configs work for my workflow. You should:
+1. Start with what resonates
+2. Modify for your stack
+3. Remove what you don't use
+4. Add your own patterns
+
+---
+
+## Links
+
+- **Full Guide:** [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/status/2012378465664745795)
+- **Follow:** [@affaanmustafa](https://x.com/affaanmustafa)
+- **zenith.chat:** [zenith.chat](https://zenith.chat)
+
+---
+
+## License
+
+MIT - Use freely, modify as needed, contribute back if you can.
+
+---
+
+**Star this repo if it helps. Read the guide. Build something great.**

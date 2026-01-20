@@ -1,20 +1,28 @@
 # Claude Code .gitignore
 ## Folder ignore in this repository
 /*
-!/agents
-!/commands
-!/plugins
-!/hooks
 
 ## File ignore in this repository
 *.*
+
+!/agents
 !/agents/**/*.*
+!/commands
 !/commands/**/*.*
-!/plugins/**/*.*
+!/examples
+!/examples/**/*.*
+!/hooks
 !/hooks/**/*.*
+!/mcp-configs/
+!/mcp-configs/**/*.*
+!/plugins
+!/plugins/**/README.md
+!/rules
+!/rules/**/*.*
 !/scripts
 !/scripts/**/*.*
-!settings.json
+!/skills
+!/skills/**/*.*
 !README.md
 !CLAUDE.md
 *.DS_Store

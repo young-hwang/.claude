@@ -1,4 +1,3 @@
-
 # User-Level CLAUDE.md Example
 
 This is an example user-level CLAUDE.md file. Place at `~/.claude/CLAUDE.md`.
