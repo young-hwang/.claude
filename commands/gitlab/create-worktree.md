@@ -34,11 +34,7 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
     - This script handles the logic for creating the worktree and outputs its path.
     - Example: `~/.claude/scripts/git-create-worktree.sh <branch_name>`
 
-5. **Initialize Spec-Kit**
-    - Executes `~/.claude/scripts/spec-kit-init.sh` passing the path to the newly created worktree directory (from step 4) as the sole argument.
-    - Example: `~/.claude/scripts/spec-kit-init.sh <path_to_worktree>`
-
-6. **Create tmux Development Session**
+5. **Create tmux Development Session**
     - Executes `~/.claude/scripts/tmux-create-session.sh` with two arguments:
       1. Session Name: `{issue_number}-develop`
       2. Target Directory: The path to the newly created worktree directory from step 4.
@@ -53,5 +49,4 @@ Provide a GitLab issue URL or issue number: $ARGUMENTS
 - Creates descriptive branch names from issue title if no branch exists (format: `feature/{number}-{slug}`)
 - Supports both local and remote branches
 - Automatically creates a tmux session named `{issue-number}-develop` if tmux is installed
-- Initializes spec-kit in the worktree directory before creating tmux session
 - Automatically starts claude code in the tmux session for immediate development
